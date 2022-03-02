@@ -1,19 +1,33 @@
-import { Box, Button, Checkbox, Flex, Icon, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr, useBreakpointValue } from "@chakra-ui/react";
-import Link from "next/link";
+import { Box, Button, Checkbox, Flex, Icon, Link, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr, useBreakpointValue } from "@chakra-ui/react";
+import NextLink from "next/link";
+import { useState } from "react";
 import { RiAddLine, RiPencilLine } from "react-icons/ri";
 import { Header } from "../../components/Header";
 import { Pagination } from "../../components/Pagination";
 import { SectionContent } from "../../components/SectionContent";
 import { Sidebar } from "../../components/Sidebar";
+import { api } from "../../services/api";
 import { useUsers } from "../../services/hooks/useUsers";
+import { queryClient } from "../../services/queryClient";
 
 export default function UserList() {
-  const { data, isLoading, isFetching, error } = useUsers()
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data, isLoading, isFetching, error } = useUsers(currentPage)
 
   const isWideVersion = useBreakpointValue({
     base: false,
     lg: true
   })
+
+  async function handlePrefetchUser(userId: string) {
+    await queryClient.prefetchQuery(['user', userId], async () => {
+      const { data } = await api.get(`users/${userId}`)
+
+      return data
+    }, {
+      staleTime: 1000 * 60 * 10 // 10 minutes
+    })
+  }
 
   return (
     <Box>
@@ -37,7 +51,7 @@ export default function UserList() {
               ) }
             </Flex>
 
-            <Link href="/users/create" passHref>
+            <NextLink href="/users/create" passHref>
               <Button
                 as="a"
                 size="sm"
@@ -49,7 +63,7 @@ export default function UserList() {
                 >
                 Criar usuário
               </Button>
-            </Link>
+            </NextLink>
           </Flex>
 
           { isLoading ? (
@@ -88,7 +102,9 @@ export default function UserList() {
                           </Td>
                           <Td>
                             <Box>
-                              <Text fontWeight="bold">{user.name}</Text>
+                              <Link color="purple.400" onMouseEnter={() => handlePrefetchUser(user.id)}>
+                                <Text fontWeight="bold">{user.name}</Text>
+                              </Link>
                               <Text fontSize="sm" color="gray.300">{user.email}</Text>
                             </Box>
                           </Td>
@@ -112,8 +128,8 @@ export default function UserList() {
 
                 <Pagination 
                   totalCountOfRegisters={data.total}
-                  currentPage={5}
-                  onPageChange={() => {}}
+                  currentPage={currentPage}
+                  onPageChange={setCurrentPage}
                 />
               </>
             )
