@@ -1,7 +1,7 @@
 import { Flex, SimpleGrid } from '@chakra-ui/react'
 import { Header } from '../components/Header'
 import { Sidebar } from '../components/Sidebar'
-import { options } from '../utils/graphicOptions'
+import { options } from '../utils/GraphicOptions'
 import { GraphicContent } from '../components/Graphic/GraphicContent';
 
 const series = [

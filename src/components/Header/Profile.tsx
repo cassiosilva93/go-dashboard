@@ -11,7 +11,7 @@ export function Profile({showProfileData = true, name, email, avatarUrl}: Profil
   return (
     <Flex align="center">
       {showProfileData && (
-        <Box mr="4" ml="4" textAlign="left">
+        <Box mr="4" ml="4" textAlign="right">
           <Text>{name}</Text>
           <Text color="gray.300" fontSize="small">
             {email}
