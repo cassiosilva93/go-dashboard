@@ -4,8 +4,14 @@ interface SectionContentProps {
   children: React.ReactNode
 }
 
-export function SectionContent({children}: SectionContentProps) {
+export function SectionContent({ children, ...rest }: SectionContentProps) {
   return (
-    <Heading size="lg" fontWeight="normal">{children}</Heading>
+    <Heading
+      size="lg"
+      fontWeight="normal"
+      {...rest}
+    >
+      {children}
+    </Heading>
   )
 }

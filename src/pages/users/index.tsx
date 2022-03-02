@@ -1,41 +1,14 @@
 import { Box, Button, Checkbox, Flex, Icon, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr, useBreakpointValue } from "@chakra-ui/react";
 import Link from "next/link";
 import { RiAddLine, RiPencilLine } from "react-icons/ri";
-import { useQuery } from "react-query";
 import { Header } from "../../components/Header";
 import { Pagination } from "../../components/Pagination";
 import { SectionContent } from "../../components/SectionContent";
 import { Sidebar } from "../../components/Sidebar";
-import { DateHelper } from "../../utils/DataHelper";
-
-interface UserData {
-  created_at: string;
-  email: string;
-  id: string;
-  name: string;
-}
-interface UsersData {
-  users: UserData[]
-}
+import { useUsers } from "../../services/hooks/useUsers";
 
 export default function UserList() {
-  const { data, isLoading, error } = useQuery('users', async () => {
-    const response = await fetch('http://localhost:3000/api/users')
-    const data: UsersData = await response.json()
-
-    const users = data.users.map(user => {
-      return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        created_at: DateHelper.formatPTBR(user.created_at),
-      }
-    })
-
-    return users
-  }, {
-    staleTime: 1000 * 5 // 5 seconds
-  })
+  const { data, isLoading, isFetching, error } = useUsers()
 
   const isWideVersion = useBreakpointValue({
     base: false,
@@ -51,7 +24,18 @@ export default function UserList() {
 
         <Box flex="1" borderRadius={8} bg="gray.800" p="8">
           <Flex mb="8" justify="space-between" alignItems="center">
-            <SectionContent>Usuários</SectionContent>
+            <Flex direction="row" alignItems="center">
+              <SectionContent>Usuários</SectionContent>
+              { !isLoading && isFetching && (
+                <Spinner 
+                  ml="4"
+                  thickness='2px'
+                  speed='0.65s'
+                  color='gray'
+                  size='sm'
+                />
+              ) }
+            </Flex>
 
             <Link href="/users/create" passHref>
               <Button
@@ -69,14 +53,14 @@ export default function UserList() {
           </Flex>
 
           { isLoading ? (
-                <Flex justify="center">
-                  <Spinner 
-                    thickness='4px'
-                    speed='0.65s'
-                    color='pink'
-                    size='lg'
-                  />
-                </Flex>
+              <Flex justify="center">
+                <Spinner 
+                  thickness='4px'
+                  speed='0.65s'
+                  color='gray'
+                  size='lg'
+                />
+              </Flex>
             )
             : error ? (
               <Flex justify="center">
@@ -96,7 +80,7 @@ export default function UserList() {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    { data.map(user => {
+                    { data.users.map(user => {
                       return (
                         <Tr key={user.id}>
                           <Td px={["4", "4", "6"]}>
@@ -126,7 +110,11 @@ export default function UserList() {
                   </Tbody>
                 </Table>
 
-                <Pagination />
+                <Pagination 
+                  totalCountOfRegisters={data.total}
+                  currentPage={5}
+                  onPageChange={() => {}}
+                />
               </>
             )
           }
